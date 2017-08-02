@@ -6,7 +6,7 @@ install_reqs = parse_requirements('requirements.txt', session='hack')
 req = [str(ir.req) for ir in install_reqs]
 setup(
     name='pandas-transformers',
-    version='0.2',
+    version='0.2.1',
 	author = "Oguzhan Sagoglu",
 	author_email = "alwaysprep@gmail.com",
 	description = ("Use pandas dataframes in sklearn pipelines"),
