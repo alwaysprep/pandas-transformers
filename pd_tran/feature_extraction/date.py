@@ -36,9 +36,10 @@ class DateTimeFeatureExtractor(TransformerMixin):
 
 
 class DeltaTimeFeatureExtractor(TransformerMixin):
-    def __init__(self, agg_by, date_field_name, how_many=1):
+    def __init__(self, agg_by, date_field_name, unique_field_name, how_many=1):
         self.agg_by = agg_by
         self.date_field_name = date_field_name
+        self.unique_field_name = unique_field_name
         self.how_many = how_many
 
     def fit(self, X, y=None):
@@ -47,16 +48,15 @@ class DeltaTimeFeatureExtractor(TransformerMixin):
 
     def transform(self, X):
 
-        def shift_method(frame):
-            frame = frame.sort_values(self.date_field_name)
-            for shift in range(self.how_many):
-                frame['Delta' + str(shift+1)] = frame[self.date_field_name] - frame[self.date_field_name].shift(shift+1)
-            return frame
+        sorted_df = X.sort_values([self.agg_by, self.date_field_name])
+        groupped = sorted_df.groupby(self.agg_by, group_keys=False)
+        for shift in range(1, 1 + self.how_many):
+            col_name = "DELTA" + str(shift)
 
-        return X.groupby(self.agg_by, group_keys=False).apply(shift_method)
+            X[col_name] = sorted_df[self.date_field_name] - sorted_df[self.date_field_name].shift(shift)
 
+            for nth in range(shift):
+                df2 = groupped.nth(nth)
+                X.loc[X[self.unique_field_name].isin(df2[self.unique_field_name]), col_name] = None
 
-
-
-
-
+        return X
