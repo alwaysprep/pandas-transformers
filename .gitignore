@@ -106,3 +106,7 @@ pip-delete-this-directory.txt
 # Translations
 *.mo
 *.pot
+
+* Private
+tests/
+data/
